@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RONBOT | Metin2 PvP & Mobile2 Otomasyon & Farm Botu</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#0b0c10',
+                        obsidianCard: 'rgba(18, 20, 29, 0.75)',
+                        neonPurple: '#7928CA',
+                        neonCyan: '#00DFD8',
+                        neonPink: '#FF0080',
+                        neonGold: '#FFD700',
+                        neonGreen: '#10B981',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Rajdhani', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-purple': '0 0 25px rgba(121, 40, 202, 0.4)',
+                        'glow-cyan': '0 0 25px rgba(0, 223, 216, 0.4)',
+                        'glow-pink': '0 0 25px rgba(255, 0, 128, 0.4)',
+                        'glow-gold': '0 0 25px rgba(255, 215, 0, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Futuristic CSS & Glow Effects -->
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-display {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Ambient Glow Mesh */
+        .bg-mesh {
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(121, 40, 202, 0.18) 0%, transparent 40%),
+                radial-gradient(circle at 85% 60%, rgba(0, 223, 216, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 90%, rgba(255, 0, 128, 0.12) 0%, transparent 50%);
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(18, 20, 29, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 223, 216, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(0, 223, 216, 0.25);
+        }
+
+        /* Gradient Text */
+        .gradient-text-purple-cyan {
+            background: linear-gradient(135deg, #00DFD8 0%, #7928CA 50%, #FF0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-text-gold {
+            background: linear-gradient(135deg, #FFF099 0%, #FFD700 50%, #FFA500 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Animated Glowing Border */
+        .glow-border {
+            position: relative;
+        }
+        .glow-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(90deg, #7928CA, #00DFD8, #FF0080, #7928CA);
+            border-radius: inherit;
+            z-index: -1;
+            background-size: 300% 300%;
+            animation: moveGradient 6s linear infinite;
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0c10;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7928CA;
+        }
+
+        /* Pulse Ring */
+        .pulse-ring {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-ring 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
+        }
+        @keyframes pulse-ring {
+            to {
+                box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* Toggle Switch Animation */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #00DFD8;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #7928CA;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen bg-obsidian bg-mesh text-slate-100 selection:bg-neonPurple selection:text-white">
+
+    <!-- Background Particle Canvas -->
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+    <!-- Navigation Bar -->
+    <header class="sticky top-0 z-50 w-full glass-card border-b border-slate-800/80 bg-obsidian/80 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-neonPurple to-neonCyan p-[2px] shadow-glow-purple group-hover:scale-105 transition-transform">
+                    <div class="w-full h-full bg-obsidian rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid fa-shield-halved text-neonCyan text-xl group-hover:rotate-12 transition-transform"></i>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display font-extrabold text-2xl tracking-wider text-white flex items-center gap-1">
+                        RON<span class="text-neonCyan">BOT</span>
+                        <span class="inline-block w-2 h-2 rounded-full bg-neonGreen animate-ping"></span>
+                    </span>
+                    <span class="text-[10px] font-mono text-slate-400 -mt-1 tracking-widest uppercase">Metin2 PvP & Mobile2</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                <a href="#ozellikler" class="hover:text-neonCyan transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-microchip text-xs text-neonPurple"></i> Özellikler
+                </a>
+                <a href="#sunucular" class="hover:text-neonCyan transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-server text-xs text-neonCyan"></i> Sunucu Durumu
+                </a>
+                <a href="#panel-demo" class="hover:text-neonCyan transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-sliders text-xs text-neonPink"></i> Canlı Demo
+                </a>
+                <a href="#paketler" class="hover:text-neonCyan transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-gem text-xs text-neonGold"></i> Paketler
+                </a>
+                <a href="#sss" class="hover:text-neonCyan transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-question text-xs text-slate-400"></i> SSS
+                </a>
+            </nav>
+
+            <!-- Header Action Buttons -->
+            <div class="hidden sm:flex items-center gap-4">
+                <a href="https://t.me" target="_blank" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/30 hover:bg-sky-500/20 hover:border-sky-400 transition-all shadow-sm">
+                    <i class="fa-brands fa-telegram text-base"></i>
+                    <span>Duyuru Kanalı</span>
+                </a>
+                <a href="#panel-demo" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-neonPurple to-neonCyan text-white shadow-glow-purple hover:opacity-90 hover:scale-105 transition-all">
+                    Panel Girişi
+                </a>
+            </div>
+
+            <!-- Mobile Hamburger Menu Button -->
+            <button id="mobileMenuBtn" class="md:hidden text-slate-300 hover:text-white p-2 text-2xl focus:outline-none">
+                <i class="fa-solid fa-bars-staggered"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Drawer Navigation -->
+        <div id="mobileDrawer" class="hidden md:hidden border-t border-slate-800 bg-obsidian/95 backdrop-blur-2xl px-6 py-6 space-y-4">
+            <a href="#ozellikler" class="mobile-link block text-base font-medium text-slate-200 hover:text-neonCyan">Özellikler</a>
+            <a href="#sunucular" class="mobile-link block text-base font-medium text-slate-200 hover:text-neonCyan">Sunucu Durumu</a>
+            <a href="#panel-demo" class="mobile-link block text-base font-medium text-slate-200 hover:text-neonCyan">İnteraktif Demo</a>
+            <a href="#paketler" class="mobile-link block text-base font-medium text-slate-200 hover:text-neonCyan">Paketler & Fiyatlar</a>
+            <a href="#sss" class="mobile-link block text-base font-medium text-slate-200 hover:text-neonCyan">Sıkça Sorulan Sorular</a>
+            <div class="pt-4 border-t border-slate-800 flex flex-col gap-3">
+                <a href="https://t.me" target="_blank" class="w-full text-center py-3 rounded-xl text-sm font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/30">
+                    <i class="fa-brands fa-telegram mr-2"></i> Telegram Duyuru Kanalı
+                </a>
+                <a href="#panel-demo" class="w-full text-center py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-neonPurple to-neonCyan text-white">
+                    Müşteri Paneline Git
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10">
+
+        <!-- HERO SECTION -->
+        <section class="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <!-- Left Hero Content -->
+                    <div class="lg:col-span-7 space-y-8 text-center lg:text-left">
+                        
+                        <!-- Live Status Badge -->
+                        <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-card border border-emerald-500/30 text-xs font-semibold text-emerald-400 shadow-lg">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 pulse-ring"></span>
+                            <span>Mobile2 (Tuva, Yakamoz, Alesta) & Tüm PvP'lerde %100 Aktif</span>
+                        </div>
+
+                        <!-- Main Headline -->
+                        <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.15]">
+                            Metin2 PvP & Mobile2 Dünyasının <br class="hidden sm:inline">
+                            <span class="gradient-text-purple-cyan">En Gelişmiş Farm Botu</span>
+                        </h1>
+
+                        <!-- Subtitle -->
+                        <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                            Yapay zeka destekli <strong class="text-white font-semibold">İnsansı Uyku Modu</strong> ve <strong class="text-white font-semibold">Saliselik GM Koruması</strong> ile ban riskini sıfıra indirin. Tuva, Yakamoz, Alesta ve tüm PvP sunucularında emeğinizi güvenceye alarak kazancınızı katlayın!
+                        </p>
+
+                        <!-- Call to Action Buttons -->
+                        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                            <a href="#paketler" class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-sm bg-gradient-to-r from-neonPurple via-purple-600 to-neonCyan text-white shadow-glow-purple hover:scale-105 hover:shadow-glow-cyan transition-all flex items-center justify-center gap-3 group">
+                                <span>Hemen Lisans Satın Al</span>
+                                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                            <a href="#panel-demo" class="w-full sm:w-auto px-8 py-4 rounded-xl font-semibold text-sm glass-card hover:bg-slate-800/80 text-slate-200 border border-slate-700/60 hover:border-neonCyan/50 transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-laptop-code text-neonCyan"></i>
+                                <span>İnteraktif Paneli İncele</span>
+                            </a>
+                        </div>
+
+                        <!-- Trust Features Micro-List -->
+                        <div class="pt-6 border-t border-slate-800/80 grid grid-cols-3 gap-4 text-center lg:text-left">
+                            <div>
+                                <div class="font-display text-xl sm:text-2xl font-bold text-white tracking-wider">14,850+</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Aktif Oyuncu</div>
+                            </div>
+                            <div>
+                                <div class="font-display text-xl sm:text-2xl font-bold text-neonCyan tracking-wider">%0 BAN</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Uyku & GM Korumalı</div>
+                            </div>
+                            <div>
+                                <div class="font-display text-xl sm:text-2xl font-bold text-neonPink tracking-wider">0.02ms</div>
+                                <div class="text-xs text-slate-400 mt-0.5">GM Algılama Hızı</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Hero Graphical HUD Dashboard Mockup -->
+                    <div class="lg:col-span-5 relative">
+                        <div class="absolute -inset-1 rounded-3xl bg-gradient-to-r from-neonPurple via-neonCyan to-neonPink opacity-30 blur-2xl -z-10 animate-pulse"></div>
+                        
+                        <!-- Simulated Live HUD Card -->
+                        <div class="glass-card rounded-2xl border border-slate-700/80 p-5 sm:p-6 shadow-2xl space-y-5">
+                            
+                            <!-- Header of Mockup -->
+                            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                    <span class="text-xs font-mono text-slate-400 ml-2">RONBOT v4.8 - Live Monitor</span>
+                                </div>
+                                <span class="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-mono border border-emerald-500/30 animate-pulse">
+                                    CONNECTING LIVE
+                                </span>
+                            </div>
+
+                            <!-- Live Stat Widgets inside HUD -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-obsidian/80 rounded-xl p-3.5 border border-slate-800/80">
+                                    <div class="text-[11px] text-slate-400 uppercase font-mono">GM Koruma Modu</div>
+                                    <div class="text-sm font-bold text-emerald-400 flex items-center gap-1.5 mt-1">
+                                        <i class="fa-solid fa-shield-check"></i> AKTİF (SALİSELİK)
+                                    </div>
+                                </div>
+                                <div class="bg-obsidian/80 rounded-xl p-3.5 border border-slate-800/80">
+                                    <div class="text-[11px] text-slate-400 uppercase font-mono">İnsansı Uyku Modu</div>
+                                    <div class="text-sm font-bold text-neonCyan flex items-center gap-1.5 mt-1">
+                                        <i class="fa-solid fa-bed"></i> MOLA SİS. AKTİF
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Live Counters Widget -->
+                            <div class="bg-slate-900/90 rounded-xl p-4 border border-slate-800 space-y-3">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-400">Sunucu / Karakter:</span>
+                                    <span class="text-white font-mono font-semibold">Mobile2 - Tuva (CH2)</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-400">Aktif Farm Süresi:</span>
+                                    <span class="text-neonGold font-mono font-bold" id="heroTimer">06:42:19</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-400">Tahribat Edilen Metin:</span>
+                                    <span class="text-neonPink font-mono font-bold" id="heroMetinCount">1,482 Adet</span>
+                                </div>
+                                
+                                <!-- Progress Bar -->
+                                <div class="space-y-1 pt-1">
+                                    <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                                        <span>Mola Verme Zamanı (İnsansı Mod)</span>
+                                        <span class="text-neonCyan">7 Dakika Kaldı</span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                        <div class="bg-gradient-to-r from-neonPurple to-neonCyan h-full w-4/5 rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Live Terminal Mini Stream -->
+                            <div class="bg-black/80 rounded-xl p-3 font-mono text-[11px] space-y-1.5 border border-slate-800 text-slate-300 h-28 overflow-hidden relative">
+                                <div class="text-slate-500 text-[10px] border-b border-slate-800/60 pb-1 mb-1">CANLI SİSTEM GÜNLÜĞÜ:</div>
+                                <div class="text-emerald-400">[19:48:02] GM Koruması Taraması OK. Yakında Yetkili Yok.</div>
+                                <div class="text-neonCyan">[19:48:15] Jeon-Un Metni Tespit Edildi. Rota Hesaplanıyor...</div>
+                                <div class="text-yellow-400">[19:48:22] Oto Pot Basıldı (HP: %88, SP: %95).</div>
+                                <div class="text-purple-400 opacity-75">[19:48:30] İnsansı Mikro Gecikme Simülasyonu (1.2s)...</div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES SECTION -->
+        <section id="ozellikler" class="py-20 relative border-t border-slate-800/80 bg-obsidian/40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <!-- Section Header -->
+                <div class="text-center max-w-3xl mx-auto space-y-4">
+                    <span class="px-3 py-1 rounded-full bg-neonPurple/10 text-neonCyan border border-neonPurple/30 text-xs font-bold uppercase tracking-widest">
+                        Rakiplerinden 10 Adım Önde
+                    </span>
+                    <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white">
+                        Sizi Ban Riski Olmadan Zirveye Taşıyan <span class="gradient-text-purple-cyan">Teknolojiler</span>
+                    </h2>
+                    <p class="text-slate-400 text-sm sm:text-base">
+                        Klasik bıkkınlık veren botları unutun. RONBOT, oyuncu davranışlarını insan elinden ayırt edilemeyecek hassasiyette taklit eder ve sizi kesintisiz kazanca ulaştırır.
+                    </p>
+                </div>
+
+                <!-- Feature Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
+                    
+                    <!-- Feature 1: İnsansı Uyku Modu -->
+                    <div class="glass-card glass-card-hover rounded-2xl p-8 relative overflow-hidden group">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-900/60 to-neonPurple/30 border border-neonPurple/40 flex items-center justify-center text-neonCyan text-2xl mb-6 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-bed-pulse"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-3 flex items-center justify-between">
+                            İnsansı Uyku Modu
+                            <span class="text-[10px] bg-neonPurple/20 text-neonCyan px-2 py-0.5 rounded border border-neonPurple/30 font-mono">Özel Algoritma</span>
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Botunuzun 7/24 aralıksız çalışması banlanmanın 1 numaralı sebebidir! İnsansı Uyku Modu, karakterinizi tıpkı gerçek bir insan gibi belirli aralıklarla molaya çıkarır, oyunda rasgele duraksamalar yapar ve tespiti imkansız hale getirir.
+                        </p>
+                    </div>
+
+                    <!-- Feature 2: Saliselik GM Koruması -->
+                    <div class="glass-card glass-card-hover rounded-2xl p-8 relative overflow-hidden group border-neonPink/20">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-pink-900/60 to-neonPink/30 border border-neonPink/40 flex items-center justify-center text-neonPink text-2xl mb-6 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-3 flex items-center justify-between">
+                            Saliselik GM Koruması
+                            <span class="text-[10px] bg-neonPink/20 text-neonPink px-2 py-0.5 rounded border border-neonPink/30 font-mono">Anında Tepki</span>
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Sunucu yöneticisi (GM) haritada veya görünmez halde yanınıza ışınlandığı an milisaniyeler içinde durumu tespit eder. Oyunu veya botu otomatik kapatır, Telegram'ınıza veya kulaklığınıza anında sesli uyarı gönderir!
+                        </p>
+                    </div>
+
+                    <!-- Feature 3: Akıllı Rota & Metin Odaklı Farm -->
+                    <div class="glass-card glass-card-hover rounded-2xl p-8 relative overflow-hidden group">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-900/60 to-neonCyan/30 border border-neonCyan/40 flex items-center justify-center text-neonCyan text-2xl mb-6 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-crosshairs"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-3">Akıllı Rota & Boss Odaklama</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Engel tanımayan akıllı yol bulma algoritması sayesinde duvarlara takılmadan en verimli Metin ve Boss rotalarını çizer. Rakiplerinizden önce hedefe ulaşır ve saniyeler içinde temizler.
+                        </p>
+                    </div>
+
+                    <!-- Feature 4: Gelişmiş Filtre & Oto Loot -->
+                    <div class="glass-card glass-card-hover rounded-2xl p-8 relative overflow-hidden group">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-900/60 to-neonGold/30 border border-neonGold/40 flex items-center justify-center text-neonGold text-2xl mb-6 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-filter text-neonGold"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-3">Gelişmiş Filtre & Oto Toplama</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Envanterinizi gereksiz çöplerle doldurmayın. Yalnızca değerli taşları, ruh taşlarını, bk'ları ve belirlediğiniz özel itemleri toplar; envanter dolduğunda otomatik düzenler.
+                        </p>
+                    </div>
+
+                    <!-- Feature 5: Multi-Client Desteği -->
+                    <div class="glass-card glass-card-hover rounded-2xl p-8 relative overflow-hidden group">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-900/60 to-blue-500/30 border border-blue-500/40 flex items-center justify-center text-blue-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-cubes"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-3">Çoklu Hesap (Multi-Client)</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Düşük CPU ve RAM tüketimi optimizasyonu ile tek bir bilgisayardan veya VPS sunucusundan onlarca hesabı eşzamanlı olarak yönetin ve farm gelirinizi katlayın.
+                        </p>
+                    </div>
+
+                    <!-- Feature 6: Otomatik Pot, Buff & Skill -->
+                    <div class="glass-card glass-card-hover rounded-2xl p-8 relative overflow-hidden group">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-900/60 to-emerald-500/30 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-white mb-3">Oto Pot, Buff & Kutsama</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Karakterinizin HP/SP durumunu milisaniyelik takip eder. Şaman kutsamaları, hava kılıcı, büyülü keskinlik gibi tüm becerileri süresi bitmeden önce yeniler.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SERVER STATUS BOARD SECTION -->
+        <section id="sunucular" class="py-20 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                    <div>
+                        <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold uppercase tracking-widest">
+                            Canlı Takip
+                        </span>
+                        <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white mt-3">
+                            Desteklenen Sunucular & <span class="gradient-text-purple-cyan">Anlık Durum</span>
+                        </h2>
+                    </div>
+                    <div class="text-slate-400 text-xs sm:text-sm font-mono flex items-center gap-2">
+                        <i class="fa-solid fa-rotate animate-spin text-neonCyan"></i>
+                        <span>Son Kontrol: <strong class="text-white" id="lastCheckTime">Az Önce</strong></span>
+                    </div>
+                </div>
+
+                <!-- Server Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    
+                    <!-- Server 1: Mobile2 Tuva -->
+                    <div class="glass-card rounded-2xl p-6 border-slate-700/80 hover:border-emerald-500/50 transition-all">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
+                                    M2
+                                </div>
+                                <h3 class="font-display font-bold text-lg text-white">Mobile2 - Tuva</h3>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                AKTİF
+                            </span>
+                        </div>
+                        <div class="space-y-2 text-xs text-slate-300 font-mono">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Koruma Seviyesi:</span>
+                                <span class="text-emerald-400 font-bold">%100 Güvenli</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Gecikme (Ping):</span>
+                                <span class="text-slate-200">14 ms</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Anti-Cheat:</span>
+                                <span class="text-neonCyan">Mobile2 Shield v3</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Server 2: Mobile2 Yakamoz -->
+                    <div class="glass-card rounded-2xl p-6 border-slate-700/80 hover:border-emerald-500/50 transition-all">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
+                                    M2
+                                </div>
+                                <h3 class="font-display font-bold text-lg text-white">Mobile2 - Yakamoz</h3>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                AKTİF
+                            </span>
+                        </div>
+                        <div class="space-y-2 text-xs text-slate-300 font-mono">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Koruma Seviyesi:</span>
+                                <span class="text-emerald-400 font-bold">%100 Güvenli</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Gecikme (Ping):</span>
+                                <span class="text-slate-200">18 ms</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Anti-Cheat:</span>
+                                <span class="text-neonCyan">Mobile2 Shield v3</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Server 3: Mobile2 Alesta -->
+                    <div class="glass-card rounded-2xl p-6 border-slate-700/80 hover:border-emerald-500/50 transition-all">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
+                                    M2
+                                </div>
+                                <h3 class="font-display font-bold text-lg text-white">Mobile2 - Alesta</h3>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                AKTİF
+                            </span>
+                        </div>
+                        <div class="space-y-2 text-xs text-slate-300 font-mono">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Koruma Seviyesi:</span>
+                                <span class="text-emerald-400 font-bold">%100 Güvenli</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Gecikme (Ping):</span>
+                                <span class="text-slate-200">12 ms</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Anti-Cheat:</span>
+                                <span class="text-neonCyan">Mobile2 Shield v3</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Server 4: Özel PvP Serverlar -->
+                    <div class="glass-card rounded-2xl p-6 border-slate-700/80 hover:border-purple-500/50 transition-all">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-neonPurple flex items-center justify-center font-bold text-xs">
+                                    PvP
+                                </div>
+                                <h3 class="font-display font-bold text-lg text-white">Tüm Metin2 PvP'ler</h3>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-500/20 text-neonPurple border border-purple-500/30">
+                                UYUMLU
+                            </span>
+                        </div>
+                        <div class="space-y-2 text-xs text-slate-300 font-mono">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Koruma Seviyesi:</span>
+                                <span class="text-emerald-400 font-bold">Tam Korumalı</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Destek:</span>
+                                <span class="text-slate-200">Svside, Iris, Uriel</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Güncelleme:</span>
+                                <span class="text-neonCyan">Otomatik Oto-Bypass</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- INTERACTIVE LIVE BOT CONTROL DASHBOARD SIMULATOR -->
+        <section id="panel-demo" class="py-20 relative bg-obsidian/70 border-t border-b border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center max-w-3xl mx-auto space-y-4 mb-14">
+                    <span class="px-3 py-1 rounded-full bg-neonCyan/10 text-neonCyan border border-neonCyan/30 text-xs font-bold uppercase tracking-widest">
+                        İnteraktif Deneyim
+                    </span>
+                    <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white">
+                        RONBOT <span class="gradient-text-purple-cyan">Canlı Kontrol Paneli Demosu</span>
+                    </h2>
+                    <p class="text-slate-400 text-sm sm:text-base">
+                        Aşağıdaki ayarları ve butonları değiştirerek RONBOT'un yapay zeka koruma mekanizmalarını ve insansı mola modunu tarayıcınızda canlı olarak test edin!
+                    </p>
+                </div>
+
+                <!-- Simulator Glass Interface -->
+                <div class="glass-card rounded-3xl border border-slate-700/90 shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+                    
+                    <!-- Left Settings Panel -->
+                    <div class="lg:col-span-5 p-6 sm:p-8 space-y-6 border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-900/40">
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-neonCyan text-lg"></i>
+                                <h3 class="font-display font-bold text-lg text-white">Bot Ayarları & Korumalar</h3>
+                            </div>
+                            <span class="text-[10px] font-mono text-slate-400">Simülasyon Modu</span>
+                        </div>
+
+                        <!-- Toggle 1: İnsansı Uyku Modu -->
+                        <div class="flex items-center justify-between p-3.5 rounded-xl bg-obsidian/80 border border-slate-800 hover:border-slate-700 transition-colors">
+                            <div class="space-y-0.5">
+                                <div class="text-sm font-semibold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-bed text-neonPurple text-xs"></i>
+                                    İnsansı Uyku Modu
+                                </div>
+                                <div class="text-[11px] text-slate-400">Rastgele molalar ile insan davranış taklidi</div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggleSleep" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neonPurple"></div>
+                            </label>
+                        </div>
+
+                        <!-- Toggle 2: Saliselik GM Koruması -->
+                        <div class="flex items-center justify-between p-3.5 rounded-xl bg-obsidian/80 border border-slate-800 hover:border-slate-700 transition-colors">
+                            <div class="space-y-0.5">
+                                <div class="text-sm font-semibold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-shield-cat text-neonPink text-xs"></i>
+                                    Saliselik GM Koruması
+                                </div>
+                                <div class="text-[11px] text-slate-400">Işınlanmada anında botu kapat/oyundan çık</div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggleGM" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neonPink"></div>
+                            </label>
+                        </div>
+
+                        <!-- Toggle 3: Metin Odaklı Otomatik Farm -->
+                        <div class="flex items-center justify-between p-3.5 rounded-xl bg-obsidian/80 border border-slate-800 hover:border-slate-700 transition-colors">
+                            <div class="space-y-0.5">
+                                <div class="text-sm font-semibold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-gem text-neonGold text-xs"></i>
+                                    Oto Metin & Boss Farmı
+                                </div>
+                                <div class="text-[11px] text-slate-400">Haritadaki metin taşlarına otomatik rota</div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggleFarm" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neonCyan"></div>
+                            </label>
+                        </div>
+
+                        <!-- Slider: Mola Sıklığı -->
+                        <div class="space-y-2 pt-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-300 font-medium">Mola Sıklığı (Dakika):</span>
+                                <span class="text-neonCyan font-mono font-bold" id="molaFreqVal">30 Dk</span>
+                            </div>
+                            <input type="range" id="molaRange" min="10" max="60" value="30" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-neonCyan">
+                        </div>
+
+                        <!-- Interactive Test Trigger Button -->
+                        <div class="pt-4 border-t border-slate-800 space-y-3">
+                            <button id="btnSimulateGM" class="w-full py-3 px-4 rounded-xl text-xs font-bold bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-glow-pink hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
+                                <span>TEST ET: GM Yanımıza Işınlandı! Simülasyonu Çalıştır</span>
+                            </button>
+                            <p class="text-[10px] text-center text-slate-400">
+                                Bu butona basarak GM algılandığında sistemin ne kadar hızlı refleks verdiğini görün.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Console Log & Stats Panel -->
+                    <div class="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-black/60">
+                        
+                        <!-- Top Live Status Dashboard -->
+                        <div>
+                            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
+                                    <h3 class="font-display font-bold text-lg text-white">Bot Çalışma Konsolu</h3>
+                                </div>
+                                <span class="px-3 py-1 rounded bg-slate-800 text-slate-300 text-xs font-mono" id="simStatusBadge">
+                                    DURUM: AKTİF FARM YAPILIYOR
+                                </span>
+                            </div>
+
+                            <!-- Live Stat Cards -->
+                            <div class="grid grid-cols-3 gap-3 mb-6">
+                                <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-center">
+                                    <div class="text-[10px] text-slate-400 font-mono uppercase">Kesilen Metin</div>
+                                    <div class="font-display text-xl font-extrabold text-neonCyan mt-0.5" id="simMetinVal">342</div>
+                                </div>
+                                <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-center">
+                                    <div class="text-[10px] text-slate-400 font-mono uppercase">Gözlenen Tehdit</div>
+                                    <div class="font-display text-xl font-extrabold text-emerald-400 mt-0.5" id="simThreatVal">0 (Sıfır)</div>
+                                </div>
+                                <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-center">
+                                    <div class="text-[10px] text-slate-400 font-mono uppercase">Güvenlik Skoru</div>
+                                    <div class="font-display text-xl font-extrabold text-neonGold mt-0.5">%100</div>
+                                </div>
+                            </div>
+
+                            <!-- Live Terminal Logs -->
+                            <div class="bg-black/90 rounded-xl p-4 font-mono text-xs space-y-2 border border-slate-800 h-64 overflow-y-auto" id="consoleLogs">
+                                <div class="text-slate-500">[19:50:00] [RONBOT v4.8] Modül başlatıldı. Sunucu: Mobile2 (Tuva)</div>
+                                <div class="text-emerald-400">[19:50:02] [GÜVENLİK] İnsansı Uyku Modu AKTİF.</div>
+                                <div class="text-emerald-400">[19:50:02] [GÜVENLİK] Saliselik GM Koruması AKTİF.</div>
+                                <div class="text-neonCyan">[19:50:08] [FARM] Tuva CH1 Sohan Dağı haritasında 90 Lv. Jeon-Un tespit edildi.</div>
+                                <div class="text-slate-300">[19:50:14] [SALDIRI] Metin taşı kesiliyor... HP: %100 | SP: %100</div>
+                                <div class="text-purple-400">[19:50:20] [İNSANSI UYKU] İnsan elini taklit eden 1.8 saniyelik mikro mola verildi.</div>
+                            </div>
+                        </div>
+
+                        <!-- Console Action Controls -->
+                        <div class="flex items-center justify-between pt-2">
+                            <button id="btnClearLogs" class="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1.5">
+                                <i class="fa-solid fa-trash-can"></i> Konsolu Temizle
+                            </button>
+                            <span class="text-[11px] text-slate-500 font-mono">Otomatik kaydırma aktif</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PRICING PACKAGES SECTION -->
+        <section id="paketler" class="py-20 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center max-w-3xl mx-auto space-y-4 mb-16">
+                    <span class="px-3 py-1 rounded-full bg-neonGold/10 text-neonGold border border-neonGold/30 text-xs font-bold uppercase tracking-widest">
+                        Esnek ve Avantajlı
+                    </span>
+                    <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white">
+                        İhtiyacınıza Uygun <span class="gradient-text-gold">RONBOT Lisans Paketleri</span>
+                    </h2>
+                    <p class="text-slate-400 text-sm sm:text-base">
+                        İster hemen deneyin, ister aylık VIP paket ile farm imparatorluğunuzu kurun. Tüm paketlerde İnsansı Uyku Modu ve GM Koruması dahildir.
+                    </p>
+                </div>
+
+                <!-- Pricing Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                    
+                    <!-- Plan 1: 1 Günlük Deneme -->
+                    <div class="glass-card rounded-3xl p-8 border-slate-800 flex flex-col justify-between glass-card-hover relative">
+                        <div class="space-y-6">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Başlangıç</span>
+                                <span class="px-2.5 py-1 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">1 Günlük Access</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-2xl font-bold text-white">Deneme Paketi</h3>
+                                <div class="mt-4 flex items-baseline gap-1">
+                                    <span class="font-display text-4xl font-extrabold text-white">₺75</span>
+                                    <span class="text-xs text-slate-400">/ 24 Saat</span>
+                                </div>
+                            </div>
+                            <ul class="space-y-3 text-xs text-slate-300 pt-4 border-t border-slate-800">
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-check text-neonCyan"></i>
+                                    <span>Tek Karakter (1 Client) Desteği</span>
+                                </li>
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-check text-neonCyan"></i>
+                                    <span>İnsansı Uyku Modu Dahil</span>
+                                </li>
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-check text-neonCyan"></i>
+                                    <span>Saliselik GM Koruması</span>
+                                </li>
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-check text-neonCyan"></i>
+                                    <span>Mobile2 & Tüm PvP Sunucuları</span>
+                                </li>
+                                <li class="flex items-center gap-2.5 text-slate-500">
+                                    <i class="fa-solid fa-xmark"></i>
+                                    <span>7/24 VIP Telegram Bildirim Botu</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <button onclick="openOrderModal('Deneme Paketi (1 Gün)', '₺75')" class="mt-8 w-full py-3.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-white transition-all">
+                            Sipariş Ver
+                        </button>
+                    </div>
+
+                    <!-- Plan 2: 30 Günlük VIP (POPULAR) -->
+                    <div class="glass-card rounded-3xl p-8 border-2 border-neonPurple/80 flex flex-col justify-between shadow-glow-purple relative scale-105 bg-gradient-to-b from-purple-950/30 via-slate-900/60 to-obsidian">
+                        <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-neonPurple to-neonCyan text-white text-[10px] font-extrabold tracking-widest uppercase shadow-md">
+                            EN POPÜLER & AVANTAJLI
+                        </div>
+                        <div class="space-y-6">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold uppercase text-neonCyan tracking-wider">Sınırsız VIP</span>
+                                <span class="px-2.5 py-1 rounded-full text-[10px] bg-neonPurple/30 text-neonCyan font-mono border border-neonPurple/40">30 Günlük Lisans</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-2xl font-bold text-white">Aylık VIP Paket</h3>
+                                <div class="mt-4 flex items-baseline gap-1">
+                                    <span class="font-display text-5xl font-extrabold gradient-text-gold">₺450</span>
+                                    <span class="text-xs text-slate-400">/ 30 Gün</span>
+                                </div>
+                            </div>
+                            <ul class="space-y-3.5 text-xs text-slate-200 pt-4 border-t border-slate-800">
+                                <li class="flex items-center gap-2.5 font-semibold text-white">
+                                    <i class="fa-solid fa-circle-check text-neonCyan"></i>
+                                    <span>Çoklu Hesap (Sınırsız Client)</span>
+                                </li>
+                                <li class="flex items-center gap-2.5 font-semibold text-white">
+                                    <i class="fa-solid fa-circle-check text-neonCyan"></i>
+                                    <span>Yapay Zeka İnsansı Uyku Modu</span>
+                                </li>
+                                <li class="flex items-center gap-2.5 font-semibold text-white">
+                                    <i class="fa-solid fa-circle-check text-neonPink"></i>
+                                    <span>Saliselik GM Koruması & Anında Disconnect</span>
+                                </li>
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-circle-check text-neonCyan"></i>
+                                    <span>7/24 Anlık Telegram Uyarı & Sesli Bildirim Botu</span>
+                                </li>
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-circle-check text-neonCyan"></i>
+                                    <span>Öncelikli Birebir VIP Teknik Destek</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <button onclick="openOrderModal('Aylık VIP Paket (30 Gün)', '₺450')" class="mt-8 w-full py-4 rounded-xl font-bold text-xs bg-gradient-to-r from-neonPurple via-purple-600 to-neonCyan text-white shadow-glow-purple hover:scale-105 transition-all">
+                            VIP Lisansı Hemen Al
+                        </button>
+                    </div>
+
+                    <!-- Plan 3: 7 Günlük Profesyonel -->
+                    <div class="glass-card rounded-3xl p-8 border-slate-800 flex flex-col justify-between glass-card-hover relative">
+                        <div class="space-y-6">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Haftalık</span>
+                                <span class="px-2.5 py-1 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">7 Günlük Access</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-2xl font-bold text-white">Haftalık Pro</h3>
+                                <div class="mt-4 flex items-baseline gap-1">
+                                    <span class="font-display text-4xl font-extrabold text-white">₺200</span>
+                                    <span class="text-xs text-slate-400">/ 7 Gün</span>
+                                </div>
+                            </div>
+                            <ul class="space-y-3 text-xs text-slate-300 pt-4 border-t border-slate-800">
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-check text-neonCyan"></i>
+                                    <span>3 Karakter (3 Client) Desteği</span>
+                                </li>
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-check text-neonCyan"></i>
+                                    <span>İnsansı Uyku Modu Dahil</span>
+                                </li>
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-check text-neonCyan"></i>
+                                    <span>Saliselik GM Koruması</span>
+                                </li>
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-check text-neonCyan"></i>
+                                    <span>Oto Pot, Loot & Rota Yönetimi</span>
+                                </li>
+                                <li class="flex items-center gap-2.5">
+                                    <i class="fa-solid fa-check text-neonCyan"></i>
+                                    <span>7/24 Standart Destek</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <button onclick="openOrderModal('Haftalık Pro Paket (7 Gün)', '₺200')" class="mt-8 w-full py-3.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-white transition-all">
+                            Sipariş Ver
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- FAQ SECTION -->
+        <section id="sss" class="py-20 relative bg-obsidian/60 border-t border-slate-800">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center space-y-4 mb-14">
+                    <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold uppercase tracking-widest">
+                        Aklınıza Takılanlar
+                    </span>
+                    <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white">
+                        Sıkça Sorulan <span class="gradient-text-purple-cyan">Sorular</span>
+                    </h2>
+                </div>
+
+                <!-- Accordion Container -->
+                <div class="space-y-4">
+                    
+                    <!-- FAQ 1 -->
+                    <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+                        <button class="faq-btn w-full p-5 text-left font-display font-bold text-base sm:text-lg text-white flex justify-between items-center hover:text-neonCyan transition-colors">
+                            <span>Ban riski var mı? RONBOT beni nasıl korur?</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
+                        </button>
+                        <div class="faq-content hidden p-5 pt-0 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-slate-800/50">
+                            Hiçbir otomasyonda %100 sıfır risk vaadi verilemez ancak RONBOT geliştirdiği <strong class="text-white font-semibold">İnsansı Uyku Modu</strong> ve <strong class="text-white font-semibold">Saliselik GM Koruması</strong> ile ban riskini piyasadaki en alt seviyeye indirir. Sistem, 7/24 robotik hareketleri engelleyerek düzenli aralıklarla insansı molalar verir ve GM algılandığı an oyunu güvenli şekilde kapatır.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 2 -->
+                    <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+                        <button class="faq-btn w-full p-5 text-left font-display font-bold text-base sm:text-lg text-white flex justify-between items-center hover:text-neonCyan transition-colors">
+                            <span>Mobile2 (Tuva, Yakamoz, Alesta) sunucularında çalışıyor mu?</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
+                        </button>
+                        <div class="faq-content hidden p-5 pt-0 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-slate-800/50">
+                            Evet! RONBOT, Mobile2 platformunun tüm aktif sunucuları (Tuva, Yakamoz, Alesta) ile %100 tam uyumlu ve test edilmiştir. Sunucu koruma güncellemeleri anlık olarak botumuza entegre edilir.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 3 -->
+                    <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+                        <button class="faq-btn w-full p-5 text-left font-display font-bold text-base sm:text-lg text-white flex justify-between items-center hover:text-neonCyan transition-colors">
+                            <span>İnsansı Uyku Modu tam olarak nasıl çalışır?</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
+                        </button>
+                        <div class="faq-content hidden p-5 pt-0 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-slate-800/50">
+                            Sistem sizlerin panelden belirlediği mola aralıklarında (örn. 30 dakikada bir) karaktere yapay zeka tarafından üretilmiş insansı hareketler yaptırır. Karakteriniz kısa süreliğine köyde bekler, pot alır, envanter düzenler veya oyundan çıkıp belirli süre sonra tekrar girer. Oyun sistemleri bu hareketleri gerçek bir insandan ayırt edemez.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 4 -->
+                    <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+                        <button class="faq-btn w-full p-5 text-left font-display font-bold text-base sm:text-lg text-white flex justify-between items-center hover:text-neonCyan transition-colors">
+                            <span>GM Koruması bir yönetici yanıma ışınlandığında ne yapıyor?</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
+                        </button>
+                        <div class="faq-content hidden p-5 pt-0 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-slate-800/50">
+                            Koruma panelinizdeki GM Koruması açık olduğunda, sistem sunucu verisini anlık tarar. Bir GM haritada görünür veya görünmez olarak alanınıza girdiğinde saliseler içinde bot durdurulur ve karakter güvenli şekilde oyundan çıkarılır. Aynı zamanda Telegram'ınıza 'GM Tespiti Edildi!' bildirimi gönderilir.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 5 -->
+                    <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+                        <button class="faq-btn w-full p-5 text-left font-display font-bold text-base sm:text-lg text-white flex justify-between items-center hover:text-neonCyan transition-colors">
+                            <span>Satın aldıktan sonra kurulumu zor mu?</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
+                        </button>
+                        <div class="faq-content hidden p-5 pt-0 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-slate-800/50">
+                            Kesinlikle hayır. Tek tıkla indirilen hazır programı açıp lisans anahtarınızı girmeniz yeterlidir. İsteğe bağlı olarak hazır optimize konfigürasyon dosyalarımızı yükleyebilirsiniz. Ayrıca 7/24 destek ekibimiz kurulumda size yardımcı olur.
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TELEGRAM CALL TO ACTION BANNER -->
+        <section class="py-16 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="glass-card rounded-3xl p-8 sm:p-12 border border-sky-500/30 bg-gradient-to-r from-sky-950/40 via-obsidian to-purple-950/40 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+                    
+                    <div class="space-y-4 text-center md:text-left z-10">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/30 text-xs font-bold">
+                            <i class="fa-brands fa-telegram"></i> Resmi Duyuru Kanalı
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-white">
+                            Gelişmeleri ve Güncellemeleri Anında Takip Edin!
+                        </h2>
+                        <p class="text-slate-300 text-xs sm:text-sm max-w-xl">
+                            Mobile2 ve PvP sunucu güncellemeleri, ban koruma taktikleri, bakım duyuruları ve özel indirim kodları için Telegram kanalımıza katılın.
+                        </p>
+                    </div>
+
+                    <a href="https://t.me" target="_blank" class="z-10 px-8 py-4 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-400 text-white shadow-lg hover:scale-105 transition-all flex items-center gap-3 whitespace-nowrap">
+                        <i class="fa-brands fa-telegram text-xl"></i>
+                        <span>Telegram Kanalına Katıl</span>
+                    </a>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-800/80 bg-obsidian/90 relative z-10 py-12 text-slate-400 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-neonPurple to-neonCyan p-[1px]">
+                        <div class="w-full h-full bg-obsidian rounded-[7px] flex items-center justify-center">
+                            <i class="fa-solid fa-shield-halved text-neonCyan text-xs"></i>
+                        </div>
+                    </div>
+                    <span class="font-display font-extrabold text-xl text-white">RON<span class="text-neonCyan">BOT</span></span>
+                </div>
+
+                <!-- Links -->
+                <div class="flex flex-wrap items-center justify-center gap-6 text-slate-300">
+                    <a href="#ozellikler" class="hover:text-neonCyan transition-colors">Özellikler</a>
+                    <a href="#sunucular" class="hover:text-neonCyan transition-colors">Sunucu Durumu</a>
+                    <a href="#panel-demo" class="hover:text-neonCyan transition-colors">Canlı Demo</a>
+                    <a href="#paketler" class="hover:text-neonCyan transition-colors">Paketler</a>
+                    <a href="#sss" class="hover:text-neonCyan transition-colors">SSS</a>
+                </div>
+
+                <!-- Copyright -->
+                <div class="text-slate-500">
+                    © 2026 RONBOT. Tüm Hakları Saklıdır.
+                </div>
+
+            </div>
+
+            <div class="pt-6 border-t border-slate-800/50 text-[11px] text-slate-500 text-center max-w-3xl mx-auto leading-relaxed">
+                Yasal Uyarı: RONBOT bağımsız bir yazılım projesidir. Metin2 ve Mobile2 marka isimleri hak sahiplerine aittir. Sistemlerimizi kullanırken oyun kuralları ve güvenlik sorumluluğu kullanıcıya aittir.
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE ORDER MODAL POPUP -->
+    <div id="orderModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-card rounded-3xl border border-slate-700/80 max-w-md w-full p-6 sm:p-8 space-y-6 relative animate-fade-in shadow-2xl">
+            
+            <button onclick="closeOrderModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="space-y-2">
+                <span class="text-[10px] font-mono text-neonCyan uppercase tracking-widest">Hızlı Sipariş Formu</span>
+                <h3 class="font-display text-2xl font-bold text-white" id="modalPackageTitle">VIP Paket</h3>
+                <p class="text-xs text-slate-300">Seçtiğiniz paket için sipariş detaylarını giriniz.</p>
+            </div>
+
+            <form id="orderForm" onsubmit="handleOrderSubmit(event)" class="space-y-4">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Sunucu Seçiniz</label>
+                    <select required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonCyan">
+                        <option value="mobile2-tuva">Mobile2 - Tuva Sunucusu</option>
+                        <option value="mobile2-yakamoz">Mobile2 - Yakamoz Sunucusu</option>
+                        <option value="mobile2-alesta">Mobile2 - Alesta Sunucusu</option>
+                        <option value="pvp-genel">Özel PvP Server (Svside / Iris / Uriel)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Telegram Kullanıcı Adınız Veya WhatsApp</label>
+                    <input type="text" required placeholder="@kullanici_adiniz" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-neonCyan">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Ödeme Yöntemi</label>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <label class="p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 flex items-center gap-2 cursor-pointer hover:border-neonPurple">
+                            <input type="radio" name="pay" checked class="accent-neonPurple">
+                            <span>Papara / Havale</span>
+                        </label>
+                        <label class="p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 flex items-center gap-2 cursor-pointer hover:border-neonPurple">
+                            <input type="radio" name="pay" class="accent-neonPurple">
+                            <span>Kripto (USDT)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] text-slate-400">Toplam Tutar:</span>
+                        <div class="font-display text-xl font-bold text-neonGold" id="modalPackagePrice">₺450</div>
+                    </div>
+                    <button type="submit" class="px-6 py-3 rounded-xl font-bold text-xs bg-gradient-to-r from-neonPurple to-neonCyan text-white shadow-glow-purple hover:scale-105 transition-all">
+                        Ödemeye Geç
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Canvas Interactive Particles
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const particles = [];
+        const particleCount = 45;
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.8 + 0.5,
+                color: Math.random() > 0.5 ? '#7928CA' : '#00DFD8',
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                alpha: Math.random() * 0.5 + 0.2
+            });
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // Mobile Drawer Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileDrawer = document.getElementById('mobileDrawer');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileDrawer.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileDrawer.classList.add('hidden');
+            });
+        });
+
+        // FAQ Accordion Logic
+        document.querySelectorAll('.faq-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const content = btn.nextElementSibling;
+                const icon = btn.querySelector('i');
+                content.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+
+        // Hero Ticker Counter Simulation
+        let heroSeconds = 24139;
+        let metinCount = 1482;
+        setInterval(() => {
+            heroSeconds++;
+            const hrs = String(Math.floor(heroSeconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((heroSeconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(heroSeconds % 60).padStart(2, '0');
+            document.getElementById('heroTimer').innerText = `${hrs}:${mins}:${secs}`;
+
+            if (Math.random() > 0.6) {
+                metinCount++;
+                document.getElementById('heroMetinCount').innerText = `${metinCount.toLocaleString()} Adet`;
+            }
+        }, 1000);
+
+        // Simulator Dashboard Controls & Console Logger
+        const toggleSleep = document.getElementById('toggleSleep');
+        const toggleGM = document.getElementById('toggleGM');
+        const toggleFarm = document.getElementById('toggleFarm');
+        const molaRange = document.getElementById('molaRange');
+        const molaFreqVal = document.getElementById('molaFreqVal');
+        const consoleLogs = document.getElementById('consoleLogs');
+        const simMetinVal = document.getElementById('simMetinVal');
+        const simThreatVal = document.getElementById('simThreatVal');
+        const btnSimulateGM = document.getElementById('btnSimulateGM');
+        const btnClearLogs = document.getElementById('btnClearLogs');
+        const simStatusBadge = document.getElementById('simStatusBadge');
+
+        let simMetin = 342;
+        let isGMSimulated = false;
+
+        molaRange.addEventListener('input', (e) => {
+            molaFreqVal.innerText = `${e.target.value} Dk`;
+            addLog(`[AYAR] İnsansı Mola Sıklığı ${e.target.value} Dakikaya Güncellendi.`, 'text-neonCyan');
+        });
+
+        function addLog(message, textColorClass = 'text-slate-300') {
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0];
+            const div = document.createElement('div');
+            div.className = textColorClass;
+            div.innerText = `[${timeStr}] ${message}`;
+            consoleLogs.appendChild(div);
+            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+        }
+
+        toggleSleep.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                addLog('İnsansı Uyku Modu AKTİF Edildi. Rastgele gecikme döngüsü başladı.', 'text-emerald-400');
+            } else {
+                addLog('UYARI: İnsansı Uyku Modu KAPATILDI! Ban riski arttı.', 'text-red-400');
+            }
+        });
+
+        toggleGM.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                addLog('Saliselik GM Koruması AKTİF Edildi. Taramalar başladı.', 'text-emerald-400');
+            } else {
+                addLog('UYARI: GM Koruması Pasif Halde!', 'text-yellow-400');
+            }
+        });
+
+        // Simulate GM Instant Disconnect Feature
+        btnSimulateGM.addEventListener('click', () => {
+            if (isGMSimulated) return;
+            isGMSimulated = true;
+
+            addLog('🚨 TEHDİT TESPİT EDİLDİ! [GM] Yöneticisi 15 Metre Yakına Işınlandı!', 'text-red-500 font-bold animate-pulse');
+            simThreatVal.innerText = '1 TEHDİT (ENGELENDİ)';
+            simThreatVal.className = 'font-display text-xl font-extrabold text-red-500 mt-0.5 animate-pulse';
+
+            if (toggleGM.checked) {
+                setTimeout(() => {
+                    addLog('🛡️ GM Koruması Devreye Girdi! Saliseler içinde Bot Durduruluyor...', 'text-neonPink font-bold');
+                }, 150);
+
+                setTimeout(() => {
+                    addLog('⚡ Karakter Oyundan Güvenle Çıkarıldı (Disconnect OK).', 'text-emerald-400 font-bold');
+                    addLog('📱 Telegram Bildirimi Gönderildi: "Tuva CH1 - GM Yakınınızda Tarafımızca Bot Kapatıldı!"', 'text-sky-400');
+                    simStatusBadge.innerText = 'DURUM: GM KORUMASI İLE GÜVENLİ KAPATILDI';
+                    simStatusBadge.className = 'px-3 py-1 rounded bg-red-900/60 text-red-300 text-xs font-mono font-bold border border-red-500/50';
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    addLog('❌ GM KORUMASI KAPALI OLDUĞU İÇİN BOT MÜDAHALE EDEMEDİ!', 'text-red-500 font-bold');
+                }, 300);
+            }
+
+            setTimeout(() => {
+                isGMSimulated = false;
+                simThreatVal.innerText = '0 (Sıfır)';
+                simThreatVal.className = 'font-display text-xl font-extrabold text-emerald-400 mt-0.5';
+                simStatusBadge.innerText = 'DURUM: AKTİF FARM YAPILIYOR';
+                simStatusBadge.className = 'px-3 py-1 rounded bg-slate-800 text-slate-300 text-xs font-mono';
+                addLog('Güvenlik sağlandı. Otomatik farm modu yeniden aktifleştirildi.', 'text-emerald-400');
+            }, 8000);
+        });
+
+        btnClearLogs.addEventListener('click', () => {
+            consoleLogs.innerHTML = '';
+            addLog('Konsol temizlendi. Taramalar devam ediyor...', 'text-slate-500');
+        });
+
+        // Periodic Random Bot Activity Simulation
+        setInterval(() => {
+            if (!isGMSimulated && toggleFarm.checked) {
+                simMetin++;
+                simMetinVal.innerText = simMetin;
+                const metinNames = ['90 Lv. Jeon-Un', '85 Lv. Tu-Young', '80 Lv. Pung-Ma', 'Mobile2 Özel Boss'];
+                const randomMetin = metinNames[Math.floor(Math.random() * metinNames.length)];
+                addLog(`[FARM] ${randomMetin} başarıyla kesildi. İtemler filtreye göre toplandı.`, 'text-slate-300');
+            }
+        }, 6000);
+
+        // Order Modal Functions
+        function openOrderModal(title, price) {
+            document.getElementById('modalPackageTitle').innerText = title;
+            document.getElementById('modalPackagePrice').innerText = price;
+            document.getElementById('orderModal').classList.remove('hidden');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.add('hidden');
+        }
+
+        function handleOrderSubmit(e) {
+            e.preventDefault();
+            alert('Siparişiniz başarıyla alındı! Telegram veya WhatsApp üzerinden yetkilimiz 2 dakika içinde sizinle iletişime geçecektir.');
+            closeOrderModal();
+        }
+
+        // Close modal on background click
+        document.getElementById('orderModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('orderModal')) {
+                closeOrderModal();
+            }
+        });
+    </script>
+</body>
+</html>
